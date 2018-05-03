@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_cancel_notification"
+        android:orderInCategory="100"
+        android:title="@string/menu_cancel_not"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_update_profile"
+        android:orderInCategory="100"
+        android:title="@string/menu_update_profile"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_delete_profile"
+        android:orderInCategory="100"
+        android:title="@string/menu_delete_profile"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_logout"
+        android:orderInCategory="100"
+        android:title="@string/menu_logout_label"
+        app:showAsAction="never"/>
+</menu>

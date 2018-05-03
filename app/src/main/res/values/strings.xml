@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">TrackingApp</string>
+    <string name="title_activity_maps">Map</string>
+
+
+    <string name="distance_label">Distance:</string>
+    <string name="time_label">Time:</string>
+    <string name="start_walk">Start Walk</string>
+    <string name="stop_walk">Stop Walk</string>
+    <string name="title_activity_log_in">LogIn</string>
+    <string name="logo_name">TrackingApp</string>
+    <string name="fullname_hint">Full Name</string>
+    <string name="username_hint">Username</string>
+    <string name="password_hint">Password</string>
+    <string name="address_hint">Address</string>
+    <string name="phone_hint">Phone number</string>
+    <string name="weight_hint">Weight (pounds)</string>
+    <string name="login_button_label">Log In</string>
+    <string name="sign_up_text">Sign Up</string>
+    <string name="update_profile_text">Update Profile</string>
+    <string name="cancel_text">Cancel</string>
+
+    <string name="login_error_title">Checking</string>
+    <string name="login_error_message">Please make sure you enter a username and password!</string>
+    <string name="register_error_message">Please make sure register info is not empty!</string>
+    <string name="user_exist_error_message">Username or Password exists</string>
+    <string name="not_found_error_message">Incorrect username or password. Try again!</string>
+    <string name="log_progress_dialog_message">Logging you in&#8230;</string>
+
+    <string name="menu_logout_label">Log Out</string>
+    <string name="menu_cancel_not">Cancel Notification</string>
+    <string name="menu_update_profile">Update Profile</string>
+    <string name="menu_delete_profile">Delete Profile</string>
+
+    <string name="daily_distance_label">Distance Walked</string>
+    <string name="daily_time_label">Total Time</string>
+    <string name="daily_pace_label">Pace</string>
+
+    <string name="message_label">Hi %s! Stay healthy</string>
+    <string name="daily_dist_data">%.1f mi</string>
+    <string name="daily_time_data">%d min</string>
+    <string name="daily_pace_data">%.1f min/mi</string>
+    <string name="achievement_title">Achievement</string>
+    <string name="achievement_message">You have %d milestones of 1000 feet. Stay healthy!</string>
+
+    <string name="notification_message">Go for a walk today.</string>
+    <string name="save_walk_data_title">Walk Activity</string>
+    <string name="save_walk_data_message">Save walk activity data</string>
+    <string name="dismiss_walk_data">Dismiss</string>
+    <string name="save_walk_data">Save</string>
+
+
+</resources>
