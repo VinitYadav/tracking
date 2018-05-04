@@ -68,7 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/daily_pace_label"
+        android:text="@string/step_label"
         android:textColor="#212121"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"/>
@@ -78,7 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        tools:text="0.3 mi/s"
+        tools:text="0"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"/>
 

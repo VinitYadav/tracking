@@ -3,7 +3,6 @@ package com.yp.trackingapp.ui;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.yp.trackingapp.ui.meter.PedoActivity;
 import com.yp.trackingapp.util.Helper;
 import com.yp.trackingapp.util.PrefManager;
 
@@ -18,7 +17,7 @@ public class DispatchActivity extends AppCompatActivity {
                 startActivity(Helper.getIntent(this, WalkActivity.class));
             } else {*/
                 //startActivity(Helper.getIntent(this, MainActivity.class));
-                startActivity(Helper.getIntent(this, PedoActivity.class));
+                startActivity(Helper.getIntent(this, MainActivity.class));
             //}
         } else {
             startActivity(Helper.getIntent(this, LogInActivity.class));

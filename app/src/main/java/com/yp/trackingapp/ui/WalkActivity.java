@@ -7,6 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,6 +35,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.yp.trackingapp.MyTaskListener;
 import com.yp.trackingapp.R;
 import com.yp.trackingapp.service.LocationService;
+import com.yp.trackingapp.ui.meter.StepDetector;
+import com.yp.trackingapp.ui.meter.StepListener;
+import com.yp.trackingapp.util.Constants;
 import com.yp.trackingapp.util.Helper;
 import com.yp.trackingapp.util.PrefManager;
 
@@ -43,6 +50,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
+import org.apache.http.util.TextUtils;
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -54,7 +63,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.realm.Realm;
 
-public class WalkActivity extends FragmentActivity implements OnMapReadyCallback, MyTaskListener {
+public class WalkActivity extends FragmentActivity implements SensorEventListener, StepListener, OnMapReadyCallback,
+        MyTaskListener {
 
     //private static final String TAG = WalkActivity.class.getSimpleName();
     private final static int MSG_UPDATE_TIME = 0;
@@ -73,6 +83,11 @@ public class WalkActivity extends FragmentActivity implements OnMapReadyCallback
     private Realm mRealm;
 
     private final Handler mUIUpdateHandler = new UIUpdateHandler(this);
+    private StepDetector simpleStepDetector;
+    private int numSteps;
+    private SensorManager sensorManager;
+    private Sensor accel;
+    private TextView textViewStepCount;
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -114,7 +129,9 @@ public class WalkActivity extends FragmentActivity implements OnMapReadyCallback
     };
 
     private void updateUserMarkerLocation(LatLng latLng) {
-        mLocationMarker.setPosition(latLng);
+        if (mLocationMarker != null) {
+            mLocationMarker.setPosition(latLng);
+        }
     }
 
     @Override
@@ -123,8 +140,13 @@ public class WalkActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_walk);
         ButterKnife.bind(this);
 
+        textViewStepCount = findViewById(R.id.textViewStepCount);
         mRealm = Realm.getDefaultInstance();
         setUpMap();
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        simpleStepDetector = new StepDetector();
+        simpleStepDetector.registerListener(this);
     }
 
     @Override
@@ -167,11 +189,14 @@ public class WalkActivity extends FragmentActivity implements OnMapReadyCallback
             initializeWalkService();
             updateWalkPref(true);
             updateStartWalkUI();
+            numSteps = 0;
+            sensorManager.registerListener(WalkActivity.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
         } else if (isServiceBound && mLocationService.isUserWalking()) {
             stopWalkService();
             updateStopWalkUI();
             updateWalkPref(false);
             saveWalkData(mLocationService.distanceCovered(), mLocationService.elapsedTime());
+            sensorManager.unregisterListener(WalkActivity.this);
         }
     }
 
@@ -200,23 +225,18 @@ public class WalkActivity extends FragmentActivity implements OnMapReadyCallback
         saveBuilder.setPositiveButton(getString(R.string.save_walk_data), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                String distance = distanceWalked + "";
+                String time = timeWalked + "";
+                String calories = "0";
+                String userId = PrefManager.getID(PrefManager.USER_ID);
+                String steps = numSteps + "";
+                String request = Constants.BASE_URL + Constants.METHOD_EDIT_WALK_DETAIL
+                        + "distance=" + distance + "&time=" + time
+                        + "&calories=" + calories + "&user_id=" + userId
+                        + "&steps=" + steps;
                 HashMap<String, String> params = new HashMap<String, String>();
-                WalkActivity.MyAsyncTask myTask = new WalkActivity.MyAsyncTask(WalkActivity.this, params, false);
-                myTask.execute("http://192.168.0.2/trackingapp/log.php?userid=" + PrefManager.getID(PrefManager
-                        .USER_ID) + "&distance=" + distanceWalked + "&time=" + timeWalked, "", "");
-//                User user = mRealm.where(User.class).equalTo("id", PrefManager.getID(PrefManager.USER_ID))
-// .findFirst();
-//                if(user != null){
-//                    mRealm.beginTransaction();
-//                    user.updateDistanceCovered(distanceWalked);
-//                    user.updateTotalTimeWalk(timeWalked);
-//                    user.setPace(Helper.calculatePace(timeWalked,distanceWalked));
-//                    mRealm.commitTransaction();
-//
-//
-//
-//                    goToDispatchActivity();
-//                }
+                SaveWalkDetailTask myTask = new SaveWalkDetailTask(WalkActivity.this, params, false);
+                myTask.execute(request);
             }
         });
         saveBuilder.setCancelable(false);
@@ -297,9 +317,38 @@ public class WalkActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onTaskResult(String result) {
-        Toast.makeText(this, "Burned Calories: " + result, Toast.LENGTH_SHORT).show();
 
+        try {
+            JSONObject jsonObject = new JSONObject(result);
+            String message = jsonObject.getString("message");
+            if (!TextUtils.isEmpty(message)) {
+                if (message.equalsIgnoreCase("Detail update successfully")
+                        || message.equalsIgnoreCase("Detail edited successfully")) {
+                    Toast.makeText(WalkActivity.this, "Details save successfully", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         goToDispatchActivity();
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            simpleStepDetector.updateAccel(
+                    event.timestamp, event.values[0], event.values[1], event.values[2]);
+        }
+    }
+
+    @Override
+    public void step(long timeNs) {
+        numSteps++;
+        textViewStepCount.setText("" + numSteps);
     }
 
     private static class UIUpdateHandler extends Handler {
@@ -334,13 +383,13 @@ public class WalkActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    class MyAsyncTask extends AsyncTask<String, Void, String> {
+    class SaveWalkDetailTask extends AsyncTask<String, Void, String> {
         MyTaskListener mListener;
         HashMap<String, String> mParamMap;
         HttpClient mHttpClient;
         boolean mBMultipart = false;
 
-        public MyAsyncTask(MyTaskListener listener, HashMap<String, String> hashMap, boolean isMultipart) {
+        public SaveWalkDetailTask(MyTaskListener listener, HashMap<String, String> hashMap, boolean isMultipart) {
             this.mListener = listener;
             this.mParamMap = hashMap;
             this.mBMultipart = isMultipart;
