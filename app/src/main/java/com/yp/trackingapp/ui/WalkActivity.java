@@ -227,13 +227,11 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
             public void onClick(DialogInterface dialogInterface, int i) {
                 String distance = distanceWalked + "";
                 String time = timeWalked + "";
-                String calories = "0";
                 String userId = PrefManager.getID(PrefManager.USER_ID);
                 String steps = numSteps + "";
                 String request = Constants.BASE_URL + Constants.METHOD_EDIT_WALK_DETAIL
                         + "distance=" + distance + "&time=" + time
-                        + "&calories=" + calories + "&user_id=" + userId
-                        + "&steps=" + steps;
+                        + "&user_id=" + userId + "&steps=" + steps;
                 HashMap<String, String> params = new HashMap<String, String>();
                 SaveWalkDetailTask myTask = new SaveWalkDetailTask(WalkActivity.this, params, false);
                 myTask.execute(request);
