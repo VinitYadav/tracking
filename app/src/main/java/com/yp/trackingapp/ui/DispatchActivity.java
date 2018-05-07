@@ -13,14 +13,13 @@ public class DispatchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         if (PrefManager.isAuthorized()) {
-            /*if (PrefManager.isUserWalking()) {
+            if (PrefManager.isUserWalking()) {
                 startActivity(Helper.getIntent(this, WalkActivity.class));
-            } else {*/
-                //startActivity(Helper.getIntent(this, MainActivity.class));
+            } else {
                 startActivity(Helper.getIntent(this, MainActivity.class));
-            //}
+            }
         } else {
-            startActivity(Helper.getIntent(this, LogInActivity.class));
+            startActivity(Helper.getIntent(this, LoginActivity.class));
         }
     }
 }

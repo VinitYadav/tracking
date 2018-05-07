@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/white_color"
     android:orientation="vertical"
-    tools:context="com.yp.trackingapp.ui.LogInActivity">
+    tools:context="com.yp.trackingapp.ui.LoginActivity">
 
     <TextView
         android:id="@+id/brandName"

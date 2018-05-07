@@ -66,7 +66,6 @@ import io.realm.Realm;
 public class WalkActivity extends FragmentActivity implements SensorEventListener, StepListener, OnMapReadyCallback,
         MyTaskListener {
 
-    //private static final String TAG = WalkActivity.class.getSimpleName();
     private final static int MSG_UPDATE_TIME = 0;
 
     @BindView(R.id.text_view_distance)
@@ -115,8 +114,6 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            //Log.e(TAG, " inside locationReceiver");
-
             int resultCode = intent.getIntExtra(Helper.INTENT_EXTRA_RESULT_CODE, RESULT_CANCELED);
 
             if (resultCode == RESULT_OK) {
@@ -143,6 +140,8 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
         textViewStepCount = findViewById(R.id.textViewStepCount);
         mRealm = Realm.getDefaultInstance();
         setUpMap();
+
+        // Initialize sensor manager & step detector
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         simpleStepDetector = new StepDetector();
@@ -190,12 +189,14 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
             updateWalkPref(true);
             updateStartWalkUI();
             numSteps = 0;
+            // Register sensor listener
             sensorManager.registerListener(WalkActivity.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
         } else if (isServiceBound && mLocationService.isUserWalking()) {
             stopWalkService();
             updateStopWalkUI();
             updateWalkPref(false);
             saveWalkData(mLocationService.distanceCovered(), mLocationService.elapsedTime());
+            // Un-Register sensor listener
             sensorManager.unregisterListener(WalkActivity.this);
         }
     }
@@ -233,6 +234,7 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
                         + "distance=" + distance + "&time=" + time
                         + "&user_id=" + userId + "&steps=" + steps;
                 HashMap<String, String> params = new HashMap<String, String>();
+                // Call service fo rsave user walk data in server database
                 SaveWalkDetailTask myTask = new SaveWalkDetailTask(WalkActivity.this, params, false);
                 myTask.execute(request);
             }
@@ -304,6 +306,9 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngZoom, 16));
     }
 
+    /**
+     * Update UI
+     */
     private void updateUI() {
         if (isServiceBound) {
             float temp = Helper.meterToMileConverter(mLocationService.distanceCovered());
@@ -315,8 +320,8 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
 
     @Override
     public void onTaskResult(String result) {
-
         try {
+            // Parse server response
             JSONObject jsonObject = new JSONObject(result);
             String message = jsonObject.getString("message");
             if (!TextUtils.isEmpty(message)) {
@@ -345,7 +350,7 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
 
     @Override
     public void step(long timeNs) {
-        numSteps++;
+        numSteps++; // Steps count increment
         textViewStepCount.setText("" + numSteps);
     }
 
@@ -381,13 +386,16 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
     }
 
 
-    class SaveWalkDetailTask extends AsyncTask<String, Void, String> {
+    /**
+     * Save walk data
+     */
+    private class SaveWalkDetailTask extends AsyncTask<String, Void, String> {
         MyTaskListener mListener;
         HashMap<String, String> mParamMap;
         HttpClient mHttpClient;
         boolean mBMultipart = false;
 
-        public SaveWalkDetailTask(MyTaskListener listener, HashMap<String, String> hashMap, boolean isMultipart) {
+        SaveWalkDetailTask(MyTaskListener listener, HashMap<String, String> hashMap, boolean isMultipart) {
             this.mListener = listener;
             this.mParamMap = hashMap;
             this.mBMultipart = isMultipart;
@@ -410,21 +418,14 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
 
         private String normalMode(String url) {
             try {
-//                HttpResponse httpResponse;
                 HttpConnectionParams.setConnectionTimeout(mHttpClient.getParams(), 30000);
-//            if (!m_isGetMethod) {
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
                 for (String key : mParamMap.keySet()) {
                     nameValuePairs.add(new BasicNameValuePair(key, mParamMap.get(key)));
                 }
-
                 HttpPost httppost = new HttpPost(url);
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 HttpResponse httpResponse = mHttpClient.execute(httppost);
-//            } else {
-//                HttpGet httpGet = new HttpGet(urls[0]);
-//                httpResponse = m_httpClient.execute(httpGet);
-//            }
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
                 return responseBody;
             } catch (Exception e) {

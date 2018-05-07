@@ -31,7 +31,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class LogInActivity extends BaseAuthentication implements MyTaskListener {
+public class LoginActivity extends BaseAuthentication implements MyTaskListener {
 
     @BindView(R.id.usernameSignIn)
     EditText mUsername;
@@ -44,7 +44,7 @@ public class LogInActivity extends BaseAuthentication implements MyTaskListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
         ButterKnife.bind(this);
-        dialog = new ProgressDialog(LogInActivity.this);
+        dialog = new ProgressDialog(LoginActivity.this);
     }
 
     @OnClick(R.id.loginBtn)

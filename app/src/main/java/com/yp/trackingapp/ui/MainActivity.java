@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        // Initialize dialog
         dialog = new ProgressDialog(MainActivity.this);
 
         Realm realm = Realm.getDefaultInstance();
@@ -89,8 +90,10 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
         }
         scheduleNotification();
 
+        // Get user walk details from server
         String userId = PrefManager.getID(PrefManager.USER_ID);
         HashMap<String, String> params = new HashMap<String, String>();
+        // Call service for get user walk details
         GetWalkDetails myTask = new GetWalkDetails(MainActivity.this, params, false);
         myTask.execute(Constants.BASE_URL + Constants.METHOD_GET_WALK_DETAIL +
                 "user_id=" + userId);
@@ -113,9 +116,7 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         getMenuInflater().inflate(R.menu.menu, menu);
-
         return true;
     }
 
@@ -123,17 +124,17 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.action_cancel_notification:
+            case R.id.action_cancel_notification: // User click on cancel notification
                 cancelNotification();
                 return true;
-            case R.id.action_update_profile:
+            case R.id.action_update_profile: // User click on update profile
                 Intent intent = new Intent(MainActivity.this, UpdateProfileActivity.class);
                 startActivity(intent);
                 return true;
-            case R.id.action_delete_profile:
+            case R.id.action_delete_profile: // User click on delete profile
                 showDeleteConfirmationPopUp();
                 return true;
-            case R.id.action_logout:
+            case R.id.action_logout: // User click on logout
                 PrefManager.setID(PrefManager.USER_ID, null);
                 goToDispatchScreen();
                 return true;
@@ -206,6 +207,13 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
         return notificationIntent;
     }
 
+    /**
+     * Create new notification
+     *
+     * @param title   Notification title
+     * @param message Notification message
+     * @return Notification object
+     */
     private Notification createNotification(String title, String message) {
         Notification.Builder builder = new Notification.Builder(this);
         builder.setContentTitle(title);
@@ -221,6 +229,9 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
         return builder.build();
     }
 
+    /**
+     * Cancel notification
+     */
     private void cancelNotification() {
         Intent notificationIntent = new Intent(this, NotificationBroadcaster.class);
         notificationIntent.putExtra(NotificationBroadcaster.NOTIFICATION_ID, 1);
@@ -230,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
     }
 
     /**
-     * Show delete confirmation pop up
+     * Show delete confirmation pop up to user
      */
     private void showDeleteConfirmationPopUp() {
         final Dialog dialog = new Dialog(MainActivity.this);
@@ -253,37 +264,43 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
             }
         });
 
+        // If user click on ok button
         textViewOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
-                String iduser = PrefManager.getID(PrefManager.USER_ID);
+                String userId = PrefManager.getID(PrefManager.USER_ID);
                 HashMap<String, String> params = new HashMap<String, String>();
-                DeletProfile myTask = new DeletProfile(MainActivity.this, params, false);
+                // Call service for delete profile
+                DeleteProfile myTask = new DeleteProfile(MainActivity.this, params, false);
                 myTask.execute(Constants.BASE_URL + Constants.METHOD_DELETE_PROFILE +
-                        "iduser=" + iduser);
+                        "iduser=" + userId);
             }
         });
     }
 
     @Override
     public void onTaskResult(String result) {
-        if (flag) {
+        if (flag) { // If user click on delete profile confirmation button (flag == true)
             if (TextUtils.isBlank(result)) {
                 Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
             } else {
                 PrefManager.setID(PrefManager.USER_ID, null);
                 Toast.makeText(MainActivity.this, "Delete profile successfully", Toast.LENGTH_SHORT).show();
-                startActivity(Helper.getIntent(this, LogInActivity.class));
+                startActivity(Helper.getIntent(this, LoginActivity.class));
                 finish();
             }
         } else {
-            if (!TextUtils.isEmpty(result)){
-                if (!result.equalsIgnoreCase("User not found")){
+            if (!TextUtils.isEmpty(result)) {
+                if (!result.equalsIgnoreCase("User not found")) {
                     try {
+                        // Parse user walk detail response
                         JSONObject jsonObject = new JSONObject(result);
-                        mTotalDist.setText(jsonObject.getString("distance")+" mi");
-                        mTotalTime.setText(jsonObject.getString("time")+" min");
+                        // Get distance
+                        mTotalDist.setText(jsonObject.getString("distance") + " mi");
+                        // Get time
+                        mTotalTime.setText(jsonObject.getString("time") + " min");
+                        // Get steps
                         mCurrentPace.setText(jsonObject.getString("steps"));
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -293,14 +310,17 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
         }
     }
 
-    private class DeletProfile extends AsyncTask<String, Void, String> {
+    /**
+     * Delete user profile
+     */
+    private class DeleteProfile extends AsyncTask<String, Void, String> {
         MyTaskListener mListener;
         HashMap<String, String> mParamMap;
         HttpClient mHttpClient;
         boolean mBMultipart = false;
 
-        DeletProfile(MyTaskListener listener, HashMap<String, String> hashMap,
-                     boolean isMultipart) {
+        DeleteProfile(MyTaskListener listener, HashMap<String, String> hashMap,
+                      boolean isMultipart) {
             this.mListener = listener;
             this.mParamMap = hashMap;
             this.mBMultipart = isMultipart;
@@ -356,6 +376,9 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
         }
     }
 
+    /**
+     * Get walk data
+     */
     private class GetWalkDetails extends AsyncTask<String, Void, String> {
         MyTaskListener mListener;
         HashMap<String, String> mParamMap;

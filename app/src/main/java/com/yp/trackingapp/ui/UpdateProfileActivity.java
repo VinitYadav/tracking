@@ -34,79 +34,93 @@ import java.util.List;
 
 public class UpdateProfileActivity extends AppCompatActivity implements MyTaskListener {
 
-    private EditText mFullName;
-    private EditText mUsername;
-    private EditText mAddress;
-    private EditText mPhoneNumber;
-    private EditText mWeight;
-    private EditText mPassword;
-    private ProgressDialog dialog;
-    private Button buttonUpdateProfile;
-    private boolean flag;
+    private EditText mFullName; // User full name
+    private EditText mUsername;// User name
+    private EditText mAddress;// User address
+    private EditText mPhoneNumber;// User phone number
+    private EditText mWeight;// User weight
+    private ProgressDialog dialog;// Progress dialog use for loader
+    private Button buttonUpdateProfile;// Update button
+    private boolean flag;// This flag use for check which service response.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_profile);
 
+        // Initialize all fields
         mFullName = findViewById(R.id.fullNameSignUp);
         mUsername = findViewById(R.id.usernameSignUp);
         mAddress = findViewById(R.id.addressSignUp);
         mPhoneNumber = findViewById(R.id.phonenumberSignUp);
         mWeight = findViewById(R.id.weightSignUp);
-        mPassword = findViewById(R.id.passwordSignUp);
         buttonUpdateProfile = findViewById(R.id.buttonUpdateProfile);
 
+        // Initialize dialog
         dialog = new ProgressDialog(UpdateProfileActivity.this);
 
+        // Set listener on update button
         buttonUpdateProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickUpdateProfile();
+                onClickUpdateProfile(); // Click on update button
             }
         });
 
+        // Get user details from server
         getUserDetail();
     }
 
+    /**
+     * Click on update button
+     */
     private void onClickUpdateProfile() {
-        String fullname = mFullName.getText().toString().trim();
-        String username = mUsername.getText().toString().trim();
+        // Get data from edit fields
+        String fullName = mFullName.getText().toString().trim();
+        String userName = mUsername.getText().toString().trim();
         String address = mAddress.getText().toString();
-        String phonenumber = mPhoneNumber.getText().toString();
+        String phoneNumber = mPhoneNumber.getText().toString();
         String weight = mWeight.getText().toString();
-        String password = mPassword.getText().toString().trim();
-        String iduser = PrefManager.getID(PrefManager.USER_ID);
+        String userId = PrefManager.getID(PrefManager.USER_ID);
 
-        if (validation(fullname, username, address, phonenumber, weight, password)) {
+        // Check all fields
+        if (validation(fullName, userName, address, phoneNumber, weight)) {
             HashMap<String, String> params = new HashMap<String, String>();
-            MyAsyncTask myTask = new MyAsyncTask(this, params, false);
+            // Cal service from server for update user profile
+            UpdateProfileTask myTask = new UpdateProfileTask(this, params, false);
+            // Create request
             String request = Constants.BASE_URL + Constants.METHOD_UPDATE_PROFILE +
-                    "iduser=" + iduser + "&username=" + username +
-                    "&fullname=" + fullname + "&address=" + address +
-                    "&phonenumber=" + phonenumber + "&weight=" + weight;
+                    "iduser=" + userId + "&username=" + userName +
+                    "&fullname=" + fullName + "&address=" + address +
+                    "&phonenumber=" + phoneNumber + "&weight=" + weight;
             myTask.execute(request);
         }
     }
 
     @Override
     public void onTaskResult(String result) {
-        if (flag){
+        if (flag) { // If user click on update button
             if (TextUtils.isBlank(result)) {
                 Toast.makeText(UpdateProfileActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(UpdateProfileActivity.this, "Update profile successfully", Toast.LENGTH_SHORT).show();
             }
-        }else{
-            if (TextUtils.isEmpty(result)|| result.equalsIgnoreCase("User not found")) {
+        } else { // When screen load first time
+            if (TextUtils.isEmpty(result) || result.equalsIgnoreCase("User not found")) {
                 Toast.makeText(UpdateProfileActivity.this, result, Toast.LENGTH_SHORT).show();
             } else {
                 try {
+                    // Parse server response
                     JSONObject jsonObject = new JSONObject(result);
+                    // Get full name
                     mFullName.setText(jsonObject.getString("fullname"));
+                    // Get user name
                     mUsername.setText(jsonObject.getString("username"));
+                    // Get address
                     mAddress.setText(jsonObject.getString("address"));
+                    // Get phone number
                     mPhoneNumber.setText(jsonObject.getString("phonenumber"));
+                    // Get weight
                     mWeight.setText(jsonObject.getString("weight"));
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -115,32 +129,37 @@ public class UpdateProfileActivity extends AppCompatActivity implements MyTaskLi
         }
     }
 
-    private boolean validation(String fullName, String username, String address, String phonenumber, String weight,
-                               String password) {
-        if (fullName.isEmpty()) {
+    /**
+     * Validation for fields
+     *
+     * @param fullName    User full name
+     * @param username    Username
+     * @param address     User address
+     * @param phonenumber User phone number
+     * @param weight      User weight
+     * @return True or False
+     */
+    private boolean validation(String fullName, String username, String address, String phonenumber, String weight) {
+        if (fullName.isEmpty()) { // Check full name isEmpty ot not
             Toast.makeText(UpdateProfileActivity.this, "Please enter full name", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (username.isEmpty()) {
+        if (username.isEmpty()) { // Check user name isEmpty ot not
             Toast.makeText(UpdateProfileActivity.this, "Please enter user name", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (address.isEmpty()) {
+        if (address.isEmpty()) {// Check address isEmpty ot not
             Toast.makeText(UpdateProfileActivity.this, "Please enter address", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (phonenumber.isEmpty()) {
+        if (phonenumber.isEmpty()) {// Check phone number isEmpty ot not
             Toast.makeText(UpdateProfileActivity.this, "Please enter phone number", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (weight.isEmpty()) {
+        if (weight.isEmpty()) {// Check weight isEmpty ot not
             Toast.makeText(UpdateProfileActivity.this, "Please enter weight", Toast.LENGTH_SHORT).show();
             return false;
         }
-        /*if (password.isEmpty()) {
-            Toast.makeText(UpdateProfileActivity.this, "Please enter password", Toast.LENGTH_SHORT).show();
-            return false;
-        }*/
         return true;
     }
 
@@ -148,10 +167,12 @@ public class UpdateProfileActivity extends AppCompatActivity implements MyTaskLi
      * Get user detail
      */
     private void getUserDetail() {
-        String iduser = PrefManager.getID(PrefManager.USER_ID);
+        String userId = PrefManager.getID(PrefManager.USER_ID);
         HashMap<String, String> params = new HashMap<String, String>();
+        // Call service from server for get user profile details
         GetUserDetailAsyncTask task = new GetUserDetailAsyncTask(UpdateProfileActivity.this, params, false);
-        String request = Constants.BASE_URL + Constants.METHOD_GET_PROFILE +"iduser=" + iduser;
+        // Create request
+        String request = Constants.BASE_URL + Constants.METHOD_GET_PROFILE + "iduser=" + userId;
         task.execute(request);
     }
 
@@ -175,7 +196,7 @@ public class UpdateProfileActivity extends AppCompatActivity implements MyTaskLi
         protected void onPreExecute() {
             super.onPreExecute();
             dialog.setMessage("Please wait.....");
-            dialog.show();
+            dialog.show(); // Show dialog
             mHttpClient = new DefaultHttpClient();
         }
 
@@ -214,20 +235,23 @@ public class UpdateProfileActivity extends AppCompatActivity implements MyTaskLi
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             if (dialog.isShowing()) {
-                dialog.dismiss();
+                dialog.dismiss(); // Cancel dialog
             }
             flag = false;
             this.mListener.onTaskResult(s);
         }
     }
 
-    private class MyAsyncTask extends android.os.AsyncTask<String, Void, String> {
+    /**
+     * Update user details
+     */
+    private class UpdateProfileTask extends android.os.AsyncTask<String, Void, String> {
         MyTaskListener mListener;
         HashMap<String, String> mParamMap;
         HttpClient mHttpClient;
         boolean mBMultipart = false;
 
-        MyAsyncTask(MyTaskListener listener, HashMap<String, String> hashMap, boolean isMultipart) {
+        UpdateProfileTask(MyTaskListener listener, HashMap<String, String> hashMap, boolean isMultipart) {
             this.mListener = listener;
             this.mParamMap = hashMap;
             this.mBMultipart = isMultipart;
@@ -237,7 +261,7 @@ public class UpdateProfileActivity extends AppCompatActivity implements MyTaskLi
         protected void onPreExecute() {
             super.onPreExecute();
             dialog.setMessage("Please wait.....");
-            dialog.show();
+            dialog.show(); // Shoe dialog
             mHttpClient = new DefaultHttpClient();
         }
 
@@ -276,7 +300,7 @@ public class UpdateProfileActivity extends AppCompatActivity implements MyTaskLi
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             if (dialog.isShowing()) {
-                dialog.dismiss();
+                dialog.dismiss(); // Cancel dialog
             }
             flag = true;
             this.mListener.onTaskResult(s);

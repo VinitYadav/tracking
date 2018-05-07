@@ -1,9 +1,6 @@
 package com.yp.trackingapp.util;
 
 public class Constants {
-    // Client
-    //public static final String BASE_URL = "http://192.168.56.1/trackingapp/";
-    // Deepak
     public static final String BASE_URL = "http://192.168.100.60/trackingapp/";
     public static final String METHOD_LOGIN = "login.php?";
     public static final String METHOD_SIGN_UP = "signup.php?";
