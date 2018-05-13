@@ -70,40 +70,14 @@ public class RegisterActivity extends BaseAuthentication implements MyTaskListen
         finish();
     }
 
-    private boolean isEmpty(String fullName, String username, String address, String phonenumber, String weight,
-                            String password) {
-        if (fullName.isEmpty()) {
-            return true;
-        }
-        if (username.isEmpty()) {
-            return true;
-        }
-        if (address.isEmpty()) {
-            return true;
-        }
-        if (phonenumber.isEmpty()) {
-            return true;
-        }
-        if (weight.isEmpty()) {
-            return true;
-        }
-        if (password.isEmpty()) {
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public void onTaskResult(String result) {
         if (Integer.valueOf(result) > 0) {
-            com.yp.trackingapp.util.PrefManager.setID(com.yp.trackingapp.util.PrefManager.USER_ID, result);
-            startActivity(com.yp.trackingapp.util.Helper.getIntent(this, DispatchActivity.class));
+            com.yp.trackingapp.util.PrefManager.setID(com.yp.trackingapp.util.
+                    PrefManager.USER_ID, result);
+            startActivity(com.yp.trackingapp.util.Helper.getIntent(this,
+                    DispatchActivity.class));
         }
-//        } else {
-//            com.yp.trackingapp.util.Helper.displayMessageToUser(this,
-//                    getString(R.string.login_error_title),
-//                    getString(R.string.not_found_error_message)).show();
-//        }
     }
 
     class MyAsyncTask extends android.os.AsyncTask<String, Void, String> {
@@ -112,7 +86,8 @@ public class RegisterActivity extends BaseAuthentication implements MyTaskListen
         HttpClient mHttpClient;
         boolean mBMultipart = false;
 
-        public MyAsyncTask(MyTaskListener listener, HashMap<String, String> hashMap, boolean isMultipart) {
+        public MyAsyncTask(MyTaskListener listener, HashMap<String, String> hashMap,
+                           boolean isMultipart) {
             this.mListener = listener;
             this.mParamMap = hashMap;
             this.mBMultipart = isMultipart;
@@ -136,7 +111,8 @@ public class RegisterActivity extends BaseAuthentication implements MyTaskListen
         private String normalMode(String url) {
             try {
 
-                HttpConnectionParams.setConnectionTimeout(mHttpClient.getParams(), 30000);
+                HttpConnectionParams.setConnectionTimeout(mHttpClient.getParams(),
+                        30000);
                 java.util.List<NameValuePair> nameValuePairs = new java.util.ArrayList<NameValuePair>();
                 for (String key : mParamMap.keySet()) {
                     nameValuePairs.add(new BasicNameValuePair(key, mParamMap.get(key)));

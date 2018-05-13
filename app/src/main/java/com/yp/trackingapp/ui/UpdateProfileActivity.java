@@ -261,7 +261,7 @@ public class UpdateProfileActivity extends AppCompatActivity implements MyTaskLi
         protected void onPreExecute() {
             super.onPreExecute();
             dialog.setMessage("Please wait.....");
-            dialog.show(); // Shoe dialog
+            dialog.show(); // Show dialog
             mHttpClient = new DefaultHttpClient();
         }
 

@@ -59,8 +59,8 @@ public class LoginActivity extends BaseAuthentication implements MyTaskListener 
         } else {
             HashMap<String, String> params = new HashMap<String, String>();
             MyAsyncTask myTask = new MyAsyncTask(this, params, false);
-            myTask.execute(Constants.BASE_URL + Constants.METHOD_LOGIN + "username=" + username + "&password=" +
-                    password, "", "");
+            myTask.execute(Constants.BASE_URL + Constants.METHOD_LOGIN
+                    + "username=" + username + "&password=" + password, "", "");
 
         }
     }
@@ -79,7 +79,8 @@ public class LoginActivity extends BaseAuthentication implements MyTaskListener 
                     getString(R.string.not_found_error_message)).show();
         } else {
             PrefManager.setID(PrefManager.USER_ID, result);
-            startActivity(com.yp.trackingapp.util.Helper.getIntent(this, DispatchActivity.class));
+            startActivity(com.yp.trackingapp.util.Helper.getIntent(this,
+                    DispatchActivity.class));
         }
     }
 
@@ -90,7 +91,7 @@ public class LoginActivity extends BaseAuthentication implements MyTaskListener 
         boolean mBMultipart = false;
 
         MyAsyncTask(MyTaskListener listener, HashMap<String, String> hashMap,
-                           boolean isMultipart) {
+                    boolean isMultipart) {
             this.mListener = listener;
             this.mParamMap = hashMap;
             this.mBMultipart = isMultipart;
@@ -115,9 +116,8 @@ public class LoginActivity extends BaseAuthentication implements MyTaskListener 
 
         private String normalMode(String url) {
             try {
-//                HttpResponse httpResponse;
-                HttpConnectionParams.setConnectionTimeout(mHttpClient.getParams(), 30000);
-//            if (!m_isGetMethod) {
+                HttpConnectionParams.setConnectionTimeout(mHttpClient.getParams(),
+                        30000);
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
                 for (String key : mParamMap.keySet()) {
                     nameValuePairs.add(new BasicNameValuePair(key, mParamMap.get(key)));
@@ -126,10 +126,6 @@ public class LoginActivity extends BaseAuthentication implements MyTaskListener 
                 HttpPost httppost = new HttpPost(url);
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 HttpResponse httpResponse = mHttpClient.execute(httppost);
-//            } else {
-//                HttpGet httpGet = new HttpGet(urls[0]);
-//                httpResponse = m_httpClient.execute(httpGet);
-//            }
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
                 return responseBody;
             } catch (Exception e) {

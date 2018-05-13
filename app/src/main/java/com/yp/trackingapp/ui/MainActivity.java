@@ -99,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
                 "user_id=" + userId);
     }
 
+    /**
+     * Set user details on UI
+     */
     private void setDailyStat(User user) {
         String message = String.format(getString(R.string.message_label), user.getFirstName());
         String dailyDist = String.format(getString(R.string.daily_dist_data), Helper.meterToMileConverter(user
@@ -145,15 +148,18 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
     @OnClick(R.id.walkBtn)
     public void goToWalkEvent(Button button) {
         Dexter.withActivity(this)
-                .withPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                .withPermissions(Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
-                        startActivity(Helper.getIntent(MainActivity.this, WalkActivity.class));
+                        startActivity(Helper.getIntent(MainActivity.this,
+                                WalkActivity.class));
                     }
 
                     @Override
-                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions,
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest>
+                                                                           permissions,
                                                                    PermissionToken token) {
 
                     }
@@ -173,7 +179,10 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
         startActivity(Helper.getIntent(this, DispatchActivity.class));
     }
 
-    // Assume user controls the periodic reminder: no reminder at office if user turn off notification
+    /**
+     * Assume user controls the periodic reminder: no reminder at office if user turn off
+     * notification
+     */
     private void scheduleNotification() {
 
         Notification notification = createNotification(getString(R.string.app_name), getString(R.string
@@ -187,7 +196,8 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
         AlarmManager alarmManager = getSystemService();
 
         // Reminder every 1 hour
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), AlarmManager.INTERVAL_HOUR,
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                cal.getTimeInMillis(), AlarmManager.INTERVAL_HOUR,
                 pendingIntent);
     }
 
@@ -196,7 +206,8 @@ public class MainActivity extends AppCompatActivity implements MyTaskListener {
     }
 
     private PendingIntent getBroadcast(Intent notificationIntent) {
-        return PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getBroadcast(this, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @NonNull

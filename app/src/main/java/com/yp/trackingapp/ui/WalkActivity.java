@@ -88,48 +88,7 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
     private Sensor accel;
     private TextView textViewStepCount;
 
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder binder) {
-            //Log.e(TAG, "Service bound");
 
-            isServiceBound = true;
-            LocationService.LocalBinder localBinder = (LocationService.LocalBinder) binder;
-            mLocationService = localBinder.getService();
-
-            if (mLocationService.isUserWalking()) {
-                updateStartWalkUI();
-            }
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            isServiceBound = false;
-        }
-    };
-
-
-    private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            int resultCode = intent.getIntExtra(Helper.INTENT_EXTRA_RESULT_CODE, RESULT_CANCELED);
-
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(WalkActivity.this, "new marker", Toast.LENGTH_SHORT).show();
-                Location userLocation = intent.getParcelableExtra(Helper.INTENT_USER_LAT_LNG);
-                LatLng latLng = getLatLng(userLocation);
-                updateUserMarkerLocation(latLng);
-            }
-        }
-    };
-
-    private void updateUserMarkerLocation(LatLng latLng) {
-        if (mLocationMarker != null) {
-            mLocationMarker.setPosition(latLng);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,11 +118,8 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
     @Override
     protected void onStop() {
         super.onStop();
-
         LocalBroadcastManager.getInstance(this).unregisterReceiver(locationReceiver);
-
         if (isServiceBound) {
-
             mLocationService.stopBroadcasting();
             if (!mLocationService.isUserWalking()) {
                 stopLocationService();
@@ -198,6 +154,50 @@ public class WalkActivity extends FragmentActivity implements SensorEventListene
             saveWalkData(mLocationService.distanceCovered(), mLocationService.elapsedTime());
             // Un-Register sensor listener
             sensorManager.unregisterListener(WalkActivity.this);
+        }
+    }
+
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder binder) {
+            //Log.e(TAG, "Service bound");
+
+            isServiceBound = true;
+            LocationService.LocalBinder localBinder = (LocationService.LocalBinder) binder;
+            mLocationService = localBinder.getService();
+
+            if (mLocationService.isUserWalking()) {
+                updateStartWalkUI();
+            }
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            isServiceBound = false;
+        }
+    };
+
+
+    private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            int resultCode = intent.getIntExtra(Helper.INTENT_EXTRA_RESULT_CODE, RESULT_CANCELED);
+
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(WalkActivity.this, "new marker",
+                        Toast.LENGTH_SHORT).show();
+                Location userLocation = intent.getParcelableExtra(Helper.INTENT_USER_LAT_LNG);
+                LatLng latLng = getLatLng(userLocation);
+                updateUserMarkerLocation(latLng);
+            }
+        }
+    };
+
+    private void updateUserMarkerLocation(LatLng latLng) {
+        if (mLocationMarker != null) {
+            mLocationMarker.setPosition(latLng);
         }
     }
 
