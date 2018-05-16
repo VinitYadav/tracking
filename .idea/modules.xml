@@ -3,9 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/tracking.iml" filepath="$PROJECT_DIR$/.idea/tracking.iml" />
-      <module fileurl="file://$PROJECT_DIR$/tracking.iml" filepath="$PROJECT_DIR$/tracking.iml" />
+      <module fileurl="file://C:\Users\Windows\Downloads\tracking\tracking\tracking.iml" filepath="C:\Users\Windows\Downloads\tracking\tracking\tracking.iml" />
     </modules>
   </component>
 </project>

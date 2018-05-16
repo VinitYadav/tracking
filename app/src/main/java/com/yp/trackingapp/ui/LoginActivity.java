@@ -22,6 +22,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
+import org.apache.http.util.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,14 +74,16 @@ public class LoginActivity extends BaseAuthentication implements MyTaskListener 
 
     @Override
     public void onTaskResult(String result) {
-        if (Integer.valueOf(result) == 0) {
-            com.yp.trackingapp.util.Helper.displayMessageToUser(this,
-                    getString(R.string.login_error_title),
-                    getString(R.string.not_found_error_message)).show();
-        } else {
-            PrefManager.setID(PrefManager.USER_ID, result);
-            startActivity(com.yp.trackingapp.util.Helper.getIntent(this,
-                    DispatchActivity.class));
+        if (!TextUtils.isEmpty(result)) {
+            if (Integer.valueOf(result) == 0) {
+                com.yp.trackingapp.util.Helper.displayMessageToUser(this,
+                        getString(R.string.login_error_title),
+                        getString(R.string.not_found_error_message)).show();
+            } else {
+                PrefManager.setID(PrefManager.USER_ID, result);
+                startActivity(com.yp.trackingapp.util.Helper.getIntent(this,
+                        DispatchActivity.class));
+            }
         }
     }
 
